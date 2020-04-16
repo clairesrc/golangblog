@@ -19,17 +19,15 @@ COPY . .
 
 # Build the application
 RUN go build -o main .
-RUN go build -o frontend .
 
 # Move to /dist directory as the place for resulting binary folder
 WORKDIR /dist
 
 # Copy binary from build to main folder
 RUN cp /build/main .
-RUN cp /build/frontend .
 
 # Export necessary port
-EXPOSE 8000 8080
+EXPOSE 8080
 
 # Command to run when starting the container
-CMD ["./start.sh"]
+CMD ["/dist/main"]
