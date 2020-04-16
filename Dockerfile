@@ -1,7 +1,35 @@
-FROM golang:buster
-WORKDIR /usr/src/app
+FROM golang:alpine
+
+# Set necessary environmet variables needed for our image
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64
+
+# Move to working directory /build
+WORKDIR /build
+
+# Copy and download dependency using go mod
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+# Copy the code into the container
 COPY . .
-RUN ./installdeps.sh
-RUN go build main.go
-EXPOSE 8080
-CMD main
+
+# Build the application
+RUN go build -o main .
+RUN go build -o frontend .
+
+# Move to /dist directory as the place for resulting binary folder
+WORKDIR /dist
+
+# Copy binary from build to main folder
+RUN cp /build/main .
+RUN cp /build/frontend .
+
+# Export necessary port
+EXPOSE 8000 8080
+
+# Command to run when starting the container
+CMD ["./start.sh"]
